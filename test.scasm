@@ -1,0 +1,12 @@
+Data: EQU &H100
+ORG &H000
+Start: CALL SubA
+Here: Jump Here
+SubA: LOAD A
+Loop: SUB B
+JPOS Loop
+RETURN
+
+ORG Data
+A: DW 0x0005
+B: DW 0x0001
