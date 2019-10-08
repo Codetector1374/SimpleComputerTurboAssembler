@@ -1,8 +1,12 @@
 *.iml
 *.ipr
 *.iws
+.idea/
 
 venv
 output
 
 .DS_Store
+
+
+__pycache__
