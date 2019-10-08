@@ -3,35 +3,39 @@ from antlr4 import FileStream, CommonTokenStream, ParseTreeListener, ParseTreeWa
 from scasm.scasmLexer import scasmLexer
 from scasm.scasmParser import scasmParser
 
+DEBUG = True
+
+symboltable = dict()
+ast = []
+currentRamAddr = 0
 
 class scasmListener(ParseTreeListener):
-
-    # Enter a parse tree produced by scasmParser#scasmProg.
     def enterScasmProg(self, ctx: scasmParser.ScasmProgContext):
+        DEBUG and print('====== Start Parsing and Abstract Syntax List (LOL) Generation ======')
+        symboltable = {}
+        ast = []
+        currentRamAddr = 0
         pass
 
     # Exit a parse tree produced by scasmParser#scasmProg.
     def exitScasmProg(self, ctx: scasmParser.ScasmProgContext):
         pass
 
-    # Enter a parse tree produced by scasmParser#scasmLines.
-    def enterScasmLines(self, ctx: scasmParser.ScasmLinesContext):
-        pass
-
-    # Exit a parse tree produced by scasmParser#scasmLines.
-    def exitScasmLines(self, ctx: scasmParser.ScasmLinesContext):
-        pass
-
-    # Enter a parse tree produced by scasmParser#scasmLine.
-    def enterScasmLine(self, ctx: scasmParser.ScasmLineContext):
-        pass
-
     # Exit a parse tree produced by scasmParser#scasmLine.
     def exitScasmLine(self, ctx: scasmParser.ScasmLineContext):
+        if ctx.label() is not None:
+            label = ctx.label().label
+            DEBUG and print('Label: %s = 0x%04X' % (label, currentRamAddr))
+            if label in symboltable:
+                sym = ctx.label().ID().symbol
+                print('WARN: Label redefinition (%s) at line %d:%d' % (label, sym.line, sym.column))
+            else:
+                symboltable[label] = currentRamAddr
         pass
 
     # Enter a parse tree produced by scasmParser#label.
     def enterLabel(self, ctx: scasmParser.LabelContext):
+        ctx.label = str(ctx.ID())
         pass
 
     # Exit a parse tree produced by scasmParser#label.
@@ -118,14 +122,6 @@ class scasmListener(ParseTreeListener):
     def exitExprTail(self, ctx: scasmParser.ExprTailContext):
         pass
 
-    # Enter a parse tree produced by scasmParser#binaryOperator.
-    def enterBinaryOperator(self, ctx: scasmParser.BinaryOperatorContext):
-        pass
-
-    # Exit a parse tree produced by scasmParser#binaryOperator.
-    def exitBinaryOperator(self, ctx: scasmParser.BinaryOperatorContext):
-        pass
-
     # Exit a parse tree produced by scasmParser#labelRef.
     def exitLabelRef(self, ctx: scasmParser.LabelRefContext):
         pass
@@ -164,5 +160,8 @@ if __name__ == '__main__':
     listener = scasmListener()
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
+
+    print('====== First Pass Symbol Table ======')
+    print(symboltable)
 
     pass
